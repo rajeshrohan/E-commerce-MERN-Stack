@@ -1,42 +1,52 @@
-import http from 'http';
-import fs from 'fs';
-
+const fs = require('fs');
 const index = fs.readFileSync('index.html', 'utf-8');          
 const data = JSON.parse(fs.readFileSync('data.json'));  
 const products = data.products; 
+const express = require('express');
 
-// above lines are outside server, so runs only one time.
+const server = express(); 
+// middle ware 
+server.use((req, res, next) =>{
+   console.log(req.method, req.ip, req.hostname, new Date(), req.get('User-Agent'));
+   next();
 
-const server = http.createServer((req, res) => {
-  console.log(req.url, req.method);
+})
 
-  if(req.url.startsWith('/product')){
-    const id = req.url.split('/')[2];
-    const product = products.find(p => p.id === (+id));
-
-    res.setHeader('content-type', 'text/html');
-      let modifiedIndex = index.replace('**title**', product.title).
-      replace('**price**', product.price).
-      replace('**rating**', product.rating).
-      replace('**url**',product.thumbnail);
-      
-      res.end(modifiedIndex);
-      return;
+const auth = (req, res, next) =>{   // to test url?password=124
+  console.log(req.query);
+  if(req.query.password=='123'){
+    next();
   }
+  else 
+    res.sendStatus(401);
+}
+// server.use(auth);
 
-  switch(req.url){
-    case '/': 
-      res.setHeader("content-type", "text/html");
-      res.end(index);
-      break;
-    case '/api' : 
-      res.setHeader('content-type', 'application/json');
-      res.end(JSON.stringify(data)); 
-      break;
-    default:
-      res.writeHead(400);
-      res.end();
-  }
-  console.log("server started");
+// API - Endpoint - Route
+server.get('/', auth, (req, res)=>{
+  res.json({type:'GET'});
+})
+server.post('/', auth, (req, res)=>{
+  res.json({type:'POST'});
+})
+server.put('/', (req, res)=>{
+  res.json({type:'PUT'});
+})
+server.delete('/', (req, res)=>{
+  res.json({type:'DELETE'});
+})
+server.patch('/', (req, res)=>{
+  res.json({type:'PATCH'});
+})
+server.get('/', (req, res)=>{
+  res.send('Hello');
+  res.status(201).send('hello with status given');
+  res.sendFile('F:\\Learn\\node\\data.json');
+  res.json(products);
+  res.sendStatus(404);
+})
+
+server.listen(8080, ()=>{   
+  console.log('server running on port 8080');
 });
-server.listen(8080);
+

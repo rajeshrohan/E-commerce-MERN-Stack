@@ -1,28 +1,30 @@
-const fs = require('fs');
-const index = fs.readFileSync('index.html', 'utf-8');          
-const data = JSON.parse(fs.readFileSync('data.json'));  
-const products = data.products; 
 const express = require('express');
-
+const morgan = require('morgan');
 const server = express(); 
-// middle ware 
-server.use((req, res, next) =>{
-   console.log(req.method, req.ip, req.hostname, new Date(), req.get('User-Agent'));
-   next();
 
-})
+server.use(express.json());
+server.use(morgan('dev'));
+server.use(express.static('public'));
 
-const auth = (req, res, next) =>{   // to test url?password=124
-  console.log(req.query);
-  if(req.query.password=='123'){
+const auth = (req, res, next) =>{   
+  console.log(req.body);      
+  if(req.body.password == '123'){ 
     next();
   }
-  else 
+  else{
     res.sendStatus(401);
+  } 
 }
-// server.use(auth);
 
 // API - Endpoint - Route
+
+
+// http://localhost:8080/product/5
+server.get('/product/:id', (req, res)=>{
+  console.log(req.params);
+  res.json({type:'GET PRODUCT'});
+})
+
 server.get('/', auth, (req, res)=>{
   res.json({type:'GET'});
 })
@@ -49,4 +51,3 @@ server.get('/', (req, res)=>{
 server.listen(8080, ()=>{   
   console.log('server running on port 8080');
 });
-

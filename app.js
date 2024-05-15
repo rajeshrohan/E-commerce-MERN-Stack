@@ -1,51 +1,54 @@
+const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
-const server = express(); 
+const server = express(); // instance of express server
 
-server.use(express.json());
-server.use(morgan('dev'));
-server.use(express.static('public'));
+const data = JSON.parse(fs.readFileSync('data.json'));  // json
+const products = data.products;                 // products array
 
-const auth = (req, res, next) =>{   
-  console.log(req.body);      
-  if(req.body.password == '123'){ 
-    next();
-  }
-  else{
-    res.sendStatus(401);
-  } 
-}
+server.use(express.json()); // mw body parser
+// server.use(morgan('dev'));  // mw for logs
+server.use(express.static('public')); // mw static hoisting
 
 // API - Endpoint - Route
 
-
-// http://localhost:8080/product/5
-server.get('/product/:id', (req, res)=>{
-  console.log(req.params);
-  res.json({type:'GET PRODUCT'});
-})
-
-server.get('/', auth, (req, res)=>{
-  res.json({type:'GET'});
-})
-server.post('/', auth, (req, res)=>{
-  res.json({type:'POST'});
-})
-server.put('/', (req, res)=>{
-  res.json({type:'PUT'});
-})
-server.delete('/', (req, res)=>{
-  res.json({type:'DELETE'});
-})
-server.patch('/', (req, res)=>{
-  res.json({type:'PATCH'});
-})
-server.get('/', (req, res)=>{
-  res.send('Hello');
-  res.status(201).send('hello with status given');
-  res.sendFile('F:\\Learn\\node\\data.json');
+// Create POST/products
+server.post('/products', (req, res)=>{
+  products.push(req.body);
+  res.status(201).json(req.body);
+});
+// Read GET /products
+server.get('/products', (req, res)=>{
   res.json(products);
-  res.sendStatus(404);
+})
+// Read GET /products/:id
+server.get('/products/:id', (req, res) =>{
+ const id =  +(req.params.id);
+ const product = products.find(p=> p.id === id);
+  res.json(product);
+});
+// Update PUT /products/:id
+server.put('/products/:id', (req, res)=>{
+  const id = +req.params.id;
+  const productIndex = products.findIndex(p=> p.id == id);
+  products.splice(productIndex, 1, {...req.body, id:id});
+  res.status(200).json({product : 'updated'});
+})
+// Upate PATCH /products/:id
+server.patch('/products/:id', (req, res)=>{
+  const id = +req.params.id;
+  const productIndex = products.findIndex(p=> p.id == id);
+  const product = products[productIndex];
+  products.splice(productIndex, 1, {...product,...req.body, id:id});
+  res.status(200).json({product : 'updated'});
+})
+// Delete DELETE /products/:id
+server.delete('/products/:id', (req, res)=>{
+  const id =  +req.params.id;
+  const productIndex = products.findIndex(p=> p.id === id);
+  const product = products[productIndex];
+  products.splice(productIndex, 1);
+  res.status(204).json(product);
 })
 
 server.listen(8080, ()=>{   

@@ -37,5 +37,5 @@ exports.deleteProduct = (req, res)=>{
     const productIndex = products.findIndex(p=> p.id === id);
     const product = products[productIndex];
     products.splice(productIndex, 1);
-    res.status(204).json(product);
+    res.status(200).json(product);
   };

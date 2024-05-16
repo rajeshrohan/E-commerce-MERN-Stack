@@ -1,23 +1,19 @@
 const express = require('express');
 const morgan = require('morgan');
 const server = express(); 
-const productController = require('./controller/product');
-const productRouter = express.Router(); 
+const productRouter = require('./routes/product');
+const userRouter = require('./routes/user')
 
 // body parser
 server.use(express.json()); 
 server.use(morgan('dev'));
 server.use(express.static('public')); 
 
-// MVC model view controller
-server
-.post('/products', productController.createProduct)
-.get('/products', productController.getAllProducts)
-.get('/products/:id', productController.getProduct)
-.put('/products/:id', productController.replaceProduct)
-.patch('/products/:id', productController.updateProduct)
-.delete('/products/:id', productController.deleteProduct);
+server.use('/products', productRouter.router);
+server.use('/users', userRouter.router);
 
 server.listen(8080, ()=>{   
   console.log('server running on port 8080');
 });
+
+// while using any route, we can give a prefix url or base url to that 

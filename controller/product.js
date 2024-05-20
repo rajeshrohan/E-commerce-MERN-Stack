@@ -1,10 +1,11 @@
 const fs = require('fs');
-const data = JSON.parse(fs.readFileSync('data.json'));
-const products = data.products;  
+const model = require('../model/product');
+const Product = model.Product;
 
-exports.createProduct = (req, res)=>{
-    products.push(req.body);
-    res.status(201).json(req.body);
+exports.createProduct = async (req, res)=>{
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json(product);
   };
 
 exports.getAllProducts = (req, res)=>{

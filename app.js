@@ -1,16 +1,23 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const mongoose  = require('mongoose');
+
 const server = express(); 
 const productRouter = require('./routes/product');
-const userRouter = require('./routes/user')
+const userRouter = require('./routes/user');
 
-//console.log(process.env.DB_PASSWORD);
+// db connection
+main().catch(err => console.log(err));
+async function main() {
+  await mongoose.connect('mongodb://127.0.0.1:27017/ecommerce');
+// mongodb://user:password@127.0.0.1:27017/test');`if auth enabled
+}
 
 // middleware 
-server.use(express.json());  // body parser
-server.use(morgan('dev'));  // logger 
-server.use(express.static('public'));  // hoisting
+server.use(express.json()); 
+server.use(morgan('dev'));  
+server.use(express.static('public'));  
 
 // Route handlers 
 server.use('/products', productRouter.router);

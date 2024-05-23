@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const cors = require('cors');
 
 const server = express();
 const productRouter = require("./routes/product");
@@ -18,6 +19,7 @@ async function connectToDatabase() {
 }
 
 // middleware
+server.use(cors()); // multiple ports data flow permission
 server.use(express.json());
 server.use(morgan("dev"));
 server.use(express.static("public"));
